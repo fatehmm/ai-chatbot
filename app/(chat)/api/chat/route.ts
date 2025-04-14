@@ -1,30 +1,30 @@
-import {
-  UIMessage,
-  appendResponseMessages,
-  createDataStreamResponse,
-  smoothStream,
-  streamText,
-} from 'ai';
 import { auth } from '@/app/(auth)/auth';
 import { systemPrompt } from '@/lib/ai/prompts';
+import { myProvider } from '@/lib/ai/providers';
+import { createDocument } from '@/lib/ai/tools/create-document';
+import { getWeather } from '@/lib/ai/tools/get-weather';
+import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
+import { updateDocument } from '@/lib/ai/tools/update-document';
+import { isProductionEnvironment } from '@/lib/constants';
 import {
-  deleteChatById,
-  getChatById,
-  saveChat,
-  saveMessages,
+    deleteChatById,
+    getChatById,
+    saveChat,
+    saveMessages,
 } from '@/lib/db/queries';
 import {
-  generateUUID,
-  getMostRecentUserMessage,
-  getTrailingMessageId,
+    generateUUID,
+    getMostRecentUserMessage,
+    getTrailingMessageId,
 } from '@/lib/utils';
+import {
+    UIMessage,
+    appendResponseMessages,
+    createDataStreamResponse,
+    smoothStream,
+    streamText,
+} from 'ai';
 import { generateTitleFromUserMessage } from '../../actions';
-import { createDocument } from '@/lib/ai/tools/create-document';
-import { updateDocument } from '@/lib/ai/tools/update-document';
-import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
-import { getWeather } from '@/lib/ai/tools/get-weather';
-import { isProductionEnvironment } from '@/lib/constants';
-import { myProvider } from '@/lib/ai/providers';
 
 export const maxDuration = 60;
 
@@ -154,14 +154,17 @@ export async function POST(request: Request) {
           sendReasoning: true,
         });
       },
-      onError: () => {
-        return 'Oops, an error occurred!';
+      onError: (error) => {
+        console.error('Stream error:', error);
+        return `Error: ${error.message || 'An error occurred while processing your request'}`;
       },
     });
   } catch (error) {
-    return new Response('An error occurred while processing your request!', {
-      status: 404,
-    });
+    console.error('Chat API error:', error);
+    return new Response(
+      `Error: ${error instanceof Error ? error.message : 'An error occurred while processing your request'}`,
+      { status: 500 }
+    );
   }
 }
 

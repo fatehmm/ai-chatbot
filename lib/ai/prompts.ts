@@ -34,13 +34,30 @@ Do not update document right after creating it. Wait for user feedback or reques
 export const regularPrompt =
   'You are a friendly assistant! Keep your responses concise and helpful.';
 
+export const reasoningPrompt = `
+You are a reasoning assistant. When responding to questions or requests:
+1. First, think through your response carefully and explain your reasoning using the <think> tag
+2. Then provide your final answer after the reasoning
+3. Keep your reasoning clear and logical
+4. Use the <think> tag to wrap your reasoning process
+
+Example:
+<think>
+To answer this question, I need to consider:
+1. The key concepts involved
+2. The relationships between these concepts
+3. The most logical conclusion based on the evidence
+</think>
+Based on this reasoning, here's my answer...
+`;
+
 export const systemPrompt = ({
   selectedChatModel,
 }: {
   selectedChatModel: string;
 }) => {
   if (selectedChatModel === 'chat-model-reasoning') {
-    return regularPrompt;
+    return reasoningPrompt;
   } else {
     return `${regularPrompt}\n\n${artifactsPrompt}`;
   }
